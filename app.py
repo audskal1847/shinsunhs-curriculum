@@ -21,6 +21,9 @@ DATA_DIR = Path(__file__).parent / "data"
 @st.cache_data
 def load_curriculum(year: int):
     path = DATA_DIR / f"curriculum_{year}.json"
+    if not path.exists():
+        # 파일이 없을 경우 에러 방지용 기본 딕셔너리 반환
+        return {"graduation_credits": 192, "area_requirements": [], "grades": []}
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -162,7 +165,7 @@ def page_home():
 
 
 # ─────────────────────────────────────────────
-# 페이지 2: 핵심 이수 경로
+# 페이지 2: 핵심 이수 경로 (★ AttributeError 방어 코드 반영)
 # ─────────────────────────────────────────────
 def page_core_path():
     st.markdown("## 🗺️ 핵심 이수 경로")
@@ -176,17 +179,29 @@ def page_core_path():
     cols = st.columns(3)
     for i, req in enumerate(requirements):
         with cols[i % 3]:
+            # 데이터가 딕셔너리형태가 아닌 문자열로 들어왔을 때를 위한 예외 처리 코드
+            if isinstance(req, dict):
+                area_name = req.get('area', '미지정 영역')
+                icon = req.get('icon', '📘')
+                credits = f"필수 {req.get('required_credits', 0)}학점"
+                desc = req.get('description', '')
+            else:
+                area_name = str(req)
+                icon = '📘'
+                credits = "필수 학점 정보 없음"
+                desc = ""
+
             st.markdown(
                 f"""
                 <div style='border: 1px solid #e5e7eb; border-radius: 12px;
                             padding: 20px; margin-bottom: 16px;
-                            background: #ffffff;'>
-                    <h4 style='margin: 0; color: #1f2937;'>{req.get('icon', '📘')} {req['area']}</h4>
+                            background: #ffffff; min-height: 140px;'>
+                    <h4 style='margin: 0; color: #1f2937;'>{icon} {area_name}</h4>
                     <p style='color: #6b7280; font-size: 13px; margin: 8px 0;'>
-                        필수 {req['required_credits']}학점
+                        {credits}
                     </p>
                     <p style='color: #374151; font-size: 14px; margin: 0;'>
-                        {req.get('description', '')}
+                        {desc}
                     </p>
                 </div>
                 """,
