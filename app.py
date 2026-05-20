@@ -76,7 +76,7 @@ def render_sidebar_footer():
 # ─────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## 🎓 신선여고")
-    st.markdown("### 진로 학업설계 가이드북")
+    st.markdown("### 성공적인 고교학점제를 위한 진로 학업설계 가이드북")
     st.markdown("---")
 
     year = st.radio(
